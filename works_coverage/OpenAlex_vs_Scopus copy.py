@@ -91,6 +91,9 @@ authors = read_json_from_file(authors_output_file, cursor=cursor, conn=conn)
 # List to store results for all authors
 all_results = []
 
+# List to store works missing exclusively in OpenAlex (with full details)
+works_missing_only_oa_details = []
+
 # Process all authors
 main_loop_count = 0
 print(f"\n")
@@ -216,7 +219,7 @@ for author_item in authors:
                     print(f"\n🔎 Comparing OpenAlex works with IRIS works...")
                     # Compare IRIS works with OpenAlex works
                     oa_matched_count = 0
-                    oa_missing_iris_works = []
+                    oa_missing_iris_works = []  # Store full work objects, not just titles
                     
                     for iris_work in iris_works:
                         found_similarity = False
@@ -280,15 +283,15 @@ for author_item in authors:
                                                     found_similarity = True
                                                     break
 
-                        # If still not found, add to missing works list
+                        # If still not found, add full work object to missing works list
                         if found_similarity == False:
-                            oa_missing_iris_works.append(iris_work.get("titolo"))
+                            oa_missing_iris_works.append(iris_work)
 
                     print(f"👌 Works match: {oa_matched_count}/{len(iris_works)} (number of works matching on OpenAlex / total number of author's works)")
                     if PRINT_NOT_MATCHED_WORKS:
                         if (oa_matched_count < len(iris_works)):
                             print(f"❌ Missing Works (title):")
-                            print(*[missing_work for missing_work in oa_missing_iris_works], sep='\n')
+                            print(*[missing_work.get("titolo") for missing_work in oa_missing_iris_works], sep='\n')
                 else:
                     print("❌ No results found on OpenAlex")
             else:
@@ -301,6 +304,7 @@ for author_item in authors:
         scopus_works_count = 0                      
         scopus_matched_count = 0
         scopus_missing_iris_works = []
+        scopus_work_mapping = {}  # Map IRIS works to their matched Scopus works (initialize outside if block)
         
         if author_scopus_id is not None:
             print(f"\n\n🔎 Searching for profile and works on Scopus...")
@@ -328,10 +332,12 @@ for author_item in authors:
                 print(f"\n🔎 Comparing Scopus works with IRIS works...")
                 # Compare IRIS works with Scopus works
                 scopus_matched_count = 0
-                scopus_missing_iris_works = []
+                scopus_missing_iris_works = []  # Store titles of works not found in Scopus
+                scopus_work_mapping = {}  # Map IRIS works to their matched Scopus works (reinitialize for this author)
                 
                 for iris_work in iris_works:
                     found_similarity = False
+                    matched_scopus_work = None
 
                     for scopus_work in scopus_works:
                         # Match by DOI
@@ -339,18 +345,23 @@ for author_item in authors:
                             if scopus_work.get("doi").lower() == iris_work.get("doi").lower():
                                 scopus_matched_count += 1
                                 found_similarity = True
+                                matched_scopus_work = scopus_work
                                 break
 
                         # Match by title similarity
-                        if scopus_work.get("title") is not None:
+                        if scopus_work.get("title") is not None and found_similarity == False:
                             similarity_score = similarity_titles(iris_work.get("titolo"), scopus_work.get("title"))
                             if similarity_score > 0.5:
                                 scopus_matched_count += 1
                                 found_similarity = True
+                                matched_scopus_work = scopus_work
                                 break
 
                     if found_similarity == False:
                         scopus_missing_iris_works.append(iris_work.get("titolo"))
+                    else:
+                        # Store mapping of IRIS work to matched Scopus work
+                        scopus_work_mapping[iris_work.get("titolo")] = matched_scopus_work
 
                 print(f"👌 Works match: {scopus_matched_count}/{len(iris_works)} (number of works matching on Scopus / total number of author's works)")
                 if PRINT_NOT_MATCHED_WORKS:
@@ -361,11 +372,50 @@ for author_item in authors:
                 print(f"❌ No results found on Scopus")
         
         # Calculate works missing only on OpenAlex (present in Scopus but not in OpenAlex)
-        works_missing_only_on_oa = len([missing_work for missing_work in oa_missing_iris_works 
-                                        if missing_work not in scopus_missing_iris_works])
-        print(f"❌ {works_missing_only_on_oa} works missing only on OpenAlex (title):")
-        print(*[missing_work for missing_work in oa_missing_iris_works 
-                if missing_work not in scopus_missing_iris_works], sep='\n')
+        # Only calculate if we have both OpenAlex and Scopus data
+        works_missing_only_on_oa = 0
+        if author_orcid is not None and author_scopus_id is not None and len(oa_missing_iris_works) > 0:
+            # Compare by title to find works missing only in OpenAlex
+            oa_missing_titles = {work.get("titolo") for work in oa_missing_iris_works}
+            scopus_missing_titles = set(scopus_missing_iris_works)
+            works_missing_only_on_oa_titles = oa_missing_titles - scopus_missing_titles
+            
+            works_missing_only_on_oa = len(works_missing_only_on_oa_titles)
+            print(f"❌ {works_missing_only_on_oa} works missing only on OpenAlex (title):")
+            print(*[title for title in works_missing_only_on_oa_titles], sep='\n')
+            
+            # Collect detailed information for works missing exclusively in OpenAlex
+            for iris_work in oa_missing_iris_works:
+                iris_title = iris_work.get("titolo")
+                if iris_title in works_missing_only_on_oa_titles:
+                    # Find the corresponding Scopus work if it exists
+                    matched_scopus_work = scopus_work_mapping.get(iris_title, None)
+                    
+                    # Create detailed record
+                    work_detail = {
+                        # Author information
+                        "author_matricola": author_employee_id,
+                        "author_first_name": author_first_name,
+                        "author_last_name": author_last_name,
+                        "author_orcid": author_orcid,
+                        "author_scopus_id": author_scopus_id,
+                        "author_tax_code": author_tax_code,
+                        "author_role": author_role,
+                        "author_birth_year": author_birth_year,
+                        # IRIS work information
+                        "iris_title": iris_work.get("titolo"),
+                        "iris_doi": iris_work.get("doi"),
+                        "iris_year": iris_work.get("anno"),
+                        "iris_handle": iris_work.get("HANDLE"),
+                        "iris_publisher": iris_work.get("nome_editore"),
+                        "iris_authors": iris_work.get("stringa_autori"),
+                        # Scopus work information (if matched)
+                        "scopus_title": matched_scopus_work.get("title") if matched_scopus_work else None,
+                        "scopus_doi": matched_scopus_work.get("doi") if matched_scopus_work else None,
+                    }
+                    works_missing_only_oa_details.append(work_detail)
+        else:
+            print(f"❌ Cannot determine works missing only on OpenAlex (missing ORCID or Scopus ID)")
         
         # Store results for this author
         if SAVE_RESULTS_TO_FILE:
@@ -405,3 +455,12 @@ if SAVE_RESULTS_TO_FILE and all_results:
     extract_statistics(all_results)
 else:
     print("\n⚠️  No results to save.")
+
+# Save works missing exclusively in OpenAlex to JSON file
+if works_missing_only_oa_details:
+    json_filename = f"works_missing_only_openalex_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    write_json_to_file(works_missing_only_oa_details, json_filename, cursor=None, conn=None)
+    print(f"\n📊 JSON file with {len(works_missing_only_oa_details)} works missing exclusively in OpenAlex saved to: {json_filename}")
+    print(f"   The file is in JSON format and can be easily opened in any text editor or browser.")
+else:
+    print("\n⚠️  No works missing exclusively in OpenAlex to save.")

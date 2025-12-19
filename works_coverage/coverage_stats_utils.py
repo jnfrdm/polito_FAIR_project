@@ -68,11 +68,11 @@ def extract_statistics(all_results):
     # KEY STATISTIC 1: Works with OA matches >= Scopus matches
     works_oa_greater_equal_scopus = [r for r in all_results 
                                      if r.get("oa_match", 0) >= r.get("scopus_match", 0)]
-    print(f"\n🎯 KEY STATISTIC 1: OpenAlex Coverage >= Scopus Coverage")
+    print(f"\n🎯 KEY STATISTIC 1: When OpenAlex Coverage is greater than or equal to Scopus Coverage")
     if total_authors > 0:
-        print(f"   Authors with OA_matched_number >= scopus_matched_number: {len(works_oa_greater_equal_scopus)} ({len(works_oa_greater_equal_scopus)/total_authors*100:.2f}%)")
+        print(f"   Authors with number of OA matching works >= number of Scopus matching works: {len(works_oa_greater_equal_scopus)} ({len(works_oa_greater_equal_scopus)/total_authors*100:.2f}%)")
     else:
-        print(f"   Authors with OA_matched_number >= scopus_matched_number: {len(works_oa_greater_equal_scopus)}")
+        print(f"   Authors with number of OA matching works >= number of Scopus matching works: {len(works_oa_greater_equal_scopus)}")
     
     # Breakdown of OA vs Scopus comparison
     oa_strictly_greater = [r for r in all_results 
@@ -102,19 +102,19 @@ def extract_statistics(all_results):
                             if r.get("lavori_mancanti_solo_su_oa", 0) > 0]
     print(f"\n🎯 KEY STATISTIC 2: Works Missing Exclusively on OpenAlex")
     if total_authors > 0:
-        print(f"   Authors with lavori_mancanti_solo_su_OA > 0: {len(works_missing_only_oa)} ({len(works_missing_only_oa)/total_authors*100:.2f}%)")
+        print(f"   Authors with number of works missing only on OpenAlex > 0: {len(works_missing_only_oa)} ({len(works_missing_only_oa)/total_authors*100:.2f}%)")
     else:
-        print(f"   Authors with lavori_mancanti_solo_su_OA > 0: {len(works_missing_only_oa)}")
+        print(f"   Authors with number of works missing only on OpenAlex > 0: {len(works_missing_only_oa)}")
     
     if works_missing_only_oa:
         avg_missing_oa = sum(r.get("lavori_mancanti_solo_su_oa", 0) for r in works_missing_only_oa) / len(works_missing_only_oa)
         total_missing_oa = sum(r.get("lavori_mancanti_solo_su_oa", 0) for r in works_missing_only_oa)
         max_missing_oa = max(r.get("lavori_mancanti_solo_su_oa", 0) for r in works_missing_only_oa)
         min_missing_oa = min(r.get("lavori_mancanti_solo_su_oa", 0) for r in works_missing_only_oa)
-        print(f"   Average lavori_mancanti_solo_su_OA (for affected authors): {avg_missing_oa:.2f}")
+        print(f"   Average number of works missing only on OpenAlex (for affected authors): {avg_missing_oa:.2f}")
         print(f"   Total works missing only on OpenAlex: {total_missing_oa}")
-        print(f"   Maximum lavori_mancanti_solo_su_OA: {max_missing_oa}")
-        print(f"   Minimum lavori_mancanti_solo_su_OA: {min_missing_oa}")
+        print(f"   Maximum number of works missing only on OpenAlex: {max_missing_oa}")
+        print(f"   Minimum number of works missing only on OpenAlex: {min_missing_oa}")
     else:
         print(f"   No authors have works missing exclusively on OpenAlex")
     

@@ -1,0 +1,7 @@
+# Python dependencies for Polito FAIR Project
+
+# Database connectivity
+mysql-connector-python>=8.0.0
+
+# HTTP library for API calls
+requests>=2.25.0
