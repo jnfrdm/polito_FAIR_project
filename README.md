@@ -32,7 +32,7 @@ The project is designed to help researchers and institutions:
 ### Author Matching (`authors_matching/`)
 - Search OpenAlex by ORCID (when available) for reliable author identification
 - Fallback to name and institution-based search when ORCID is unavailable
-- DOI-based work analysis for disambiguating multiple author matches
+- DOI-based work analysis to validate and disambiguate OpenAlex author matches
 - Comprehensive statistics on matching performance
 
 ### Work Matching (`works_matching/`)
@@ -153,7 +153,7 @@ python authors_matching/authors_match.py
 This script will:
 1. Fetch all authors from IRIS database
 2. Search OpenAlex for each author (by ORCID if available, otherwise by name/institution)
-3. For authors with multiple matches, perform DOI-based analysis
+3. When OpenAlex matches are found, perform DOI-based analysis to validate/disambiguate them
 4. Generate and display matching statistics
 
 ### Work Matching

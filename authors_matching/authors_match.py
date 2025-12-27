@@ -40,6 +40,8 @@ print()
 select_all_authors_query = """
 SELECT DISTINCT matricola, NOME_AUTORE, COGNOME_AUTORE, ORCID
 FROM pub_ri_prodotti_autori
+where anno > 1996 and anno < 1998 and ORCID is null
+limit 200
 """
 
 print("Fetching all authors from IRIS...")
@@ -173,10 +175,13 @@ for idx, author in enumerate(authors, 1):
     for oa_idx, (display_name_choose, id_choose) in enumerate(oa_authors, 1):
         print(f"    {oa_idx}. {display_name_choose} ({id_choose})")
     
-    # STEP 2: If multiple matches found, use DOI-based work analysis to find the best match
+    # STEP 2: Use DOI-based work analysis to find the best match (even for single matches)
     # This analyzes which OpenAlex author appears most frequently in the author's publications
-    if len(oa_authors) > 1:
-        print(f"  Multiple matches found - checking for DOI-based analysis...")
+    if len(oa_authors) >= 1:
+        if len(oa_authors) > 1:
+            print(f"  Multiple matches found - checking for DOI-based analysis...")
+        else:
+            print(f"  Single match found - verifying with DOI-based analysis...")
         
         # Query to get all DOIs for publications by this author (matricola)
         # Joins pub_ri_prodotti_autori with pub_ri_prodotti_base to get DOI information
@@ -302,12 +307,6 @@ for idx, author in enumerate(authors, 1):
                 else:
                     print(f"  ✗ No result")
                     author_stats["no_compatible_match"] = True
-    else:
-        # Single match found - no need for further analysis (unique match)
-        if oa_authors:
-            oa_display_name, oa_id = oa_authors[0]
-            print(f"  ✓ Single match found - no further analysis needed")
-            print(f"    OpenAlex ID: {oa_id}")
     
     # Add statistics entry to list
     stats_data.append(author_stats)
