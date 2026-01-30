@@ -249,6 +249,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or issues, please open an issue on the repository.
 
+## 🤝 Funding disclaimer
+
+Funded within the framework of the CoARA Boost Project under grant agreement No 101131826.
+
 ---
 
 **Note**: This project is designed for use with the IRIS database at Politecnico di Torino. Adaptations may be needed for other institutional repositories.
