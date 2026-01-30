@@ -76,10 +76,5 @@ def print_statistics(stats):
         print(f"   - Poor quality (<0.5): {dist['poor_quality (<0.5)']}")
         print(f"   - High confidence (>0.8): {dist['high_confidence (>0.8)']}")
     
-    print(f"\n🔍 SEARCH METHOD STATISTICS:")
-    print(f"   Method usage counts:")
-    for method, count in stats['search_method_counts'].items():
-        print(f"   - {method}: {count}")
-    
     print("\n" + "="*80)
 
