@@ -2,6 +2,10 @@
 
 A Python project for matching and comparing academic authors and works between IRIS (Politecnico di Torino's institutional repository), OpenAlex, and Scopus databases. This project implements FAIR (Findable, Accessible, Interoperable, Reusable) data principles for academic research data management.
 
+**This code is part of the [FEDRA project](https://www.polito.it/en/research/scenario/research-database?progetto=1676%2F2024).** The FEDRA project (An institutional FAIR data lakE for transparent, inclusive, and reproDucible Research Assessment) aims to design and validate an institutional research information data lake aligned with the FAIR principles, to support accountable, transparent, and reproducible research assessment. The project builds on the Politecnico di Torino Research Registry, which integrates information from multiple internal databases covering key research dimensions (e.g., projects, proposals, contracts, patents, publications, datasets, and personnel records), and provides governed access to these data for analytics and meta-research.
+
+A technical report describing this code has been published and is available at: [https://doi.org/10.5281/zenodo.18434865](https://doi.org/10.5281/zenodo.18434865).
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -12,6 +16,7 @@ A Python project for matching and comparing academic authors and works between I
 - [Usage](#usage)
 - [Modules](#modules)
 - [Dependencies](#dependencies)
+- [Funding](#funding)
 - [License](#license)
 
 ## 🎯 Overview
@@ -53,16 +58,14 @@ The project is designed to help researchers and institutions:
 polito_FAIR_project/
 ├── authors_matching/
 │   ├── authors_match.py          # Main author matching script
-│   ├── stats_utils.py            # Author matching statistics utilities
-│   └── search_author.ipynb       # Jupyter notebook for author search
+│   └── stats_utils.py            # Author matching statistics utilities
 ├── works_matching/
 │   ├── works_match.py            # Main work matching script
 │   ├── stats_utils.py            # Work matching statistics utilities
 │   └── search_work.ipynb         # Jupyter notebook for work search
 ├── works_coverage/
 │   ├── OpenAlex_vs_Scopus.py     # Main coverage comparison script
-│   ├── coverage_stats_utils.py   # Coverage statistics utilities
-│   └── OpenAlex_vs_Scopus copy.py # Backup/alternative version
+│   └── coverage_stats_utils.py   # Coverage statistics utilities
 ├── utilities/
 │   ├── db_utils.py               # Database connection and query utilities
 │   ├── file_utils.py             # File I/O utilities (JSON)
@@ -249,7 +252,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 For questions or issues, please open an issue on the repository.
 
-## 🤝 Funding disclaimer
+## 🤝 Funding
 
 Funded within the framework of the CoARA Boost Project under grant agreement No 101131826.
 
